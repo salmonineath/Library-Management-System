@@ -58,7 +58,7 @@
       <!-- Add Book Modal -->
       <div
         v-if="showAddBook"
-        class="fixed inset-0 bg-black/50 bg-opacity-30 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
       >
         <div class="bg-white p-6 rounded shadow w-96">
           <h2 class="text-lg font-bold mb-4">Add New Book</h2>
@@ -90,18 +90,18 @@
             class="w-full mb-2 px-3 py-2 border rounded"
           />
           <div class="flex justify-end gap-2">
-            <BaseButton
-              label="Cancel"
-              variant="secondary"
+            <button
               @click="showAddBook = false"
-              customClass="px-4 py-2 rounded "
-            />
-            <BaseButton
-              label="Add"
-              variant="primary"
+              class="px-4 py-2 rounded bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
               @click="addBook"
-              customClass="px-4 py-2 rounded"
-            />
+              class="px-4 py-2 rounded bg-blue-600 text-white"
+            >
+              Add
+            </button>
           </div>
         </div>
       </div>
@@ -221,7 +221,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import BaseButton from "../../components/BaseButton.vue";
 
 // JWT token
 const token =

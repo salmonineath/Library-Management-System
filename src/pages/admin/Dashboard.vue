@@ -1,15 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import BarChart from "../../components/BarChart.vue";
 import axios from "axios";
-import { isComputedPropertyName } from "typescript";
 
-const totalBooks = ref(0);
-const totalStudents = ref(0);
-const totalCategory = ref(0);
-const totalBorrows = ref(0);
-const borrowNotReturn = ref(0);
-const bookReturned = ref(0);
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const books = ref([]);
+const categories = ref([]);
 const students = ref([]);
 const searchQuery = ref("");
 
@@ -40,22 +37,15 @@ onMounted(async () => {
   };
 
   try {
-    const res = await axios.get("http://localhost:3000/api/dashboard", config);
-    const data = res.data;
+    const [bookres, categoriesres, studentres] = await Promise.all([
+      axios.get(`${BASE_URL}/api/books`, config),
+      axios.get(`${BASE_URL}/api/categories`, config),
+      axios.get(`${BASE_URL}/api/students`, config),
+    ]);
 
-    totalBooks.value = data.total_books || 0;
-    totalStudents.value = data.total_students || 0;
-    totalCategory.value = 0;
-    totalBorrows.value = data.total_borrows || 0;
-    borrowNotReturn.value = data.borrowed_not_returned || 0;
-    bookReturned.value = data.returned || 0;
-
-    const studentRes = await axios.get(
-      "http://localhost:3000/api/students?page=1&limit=10",
-      config
-    );
-    students.value = studentRes.data.students;
-    // console.log(studentRes.data.students, "res");
+    books.value = bookres.data;
+    categories.value = categoriesres.data;
+    students.value = studentres.data;
   } catch (error) {
     console.error("Failed to fetch dashboard or students:", error);
   }
@@ -206,37 +196,30 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="max-h-[22rem] overflow-y-auto">
-            <div v-if="filteredStudents.length" class="space-y-4">
-              <div
-                v-for="student in filteredStudents"
-                :key="student.id"
-                class="bg-gray-200 rounded-lg p-4 hover:border hover:border-gray-700 transition-colors"
-              >
-                <div class="flex flex-col space-y-2">
-                  <div class="font-semibold text-gray-900 text-sm">
-                    {{ student.full_name }}
-                  </div>
-                  <div class="text-gray-800 text-xs">
-                    ID: {{ student.id_card }}
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span
-                      class="text-xs bg-purple-500/20 text-gray-900 px-2 py-1 rounded"
-                    >
-                      {{ student.class }}
-                    </span>
-                    <span class="text-xs text-gray-800">
-                      #{{ student.created_by }}
-                    </span>
-                  </div>
+          <div class="space-y-3 max-h-[25rem] overflow-y-auto">
+            <div
+              v-for="student in students"
+              :key="student.id"
+              class="bg-gray-200 rounded-lg p-4 hover:border hover:border-gray-700 transition-colors"
+            >
+              <div class="flex flex-col space-y-2">
+                <div class="font-semibold text-gray-900 text-sm">
+                  {{ student.name }}
+                </div>
+                <div class="text-gray-800 text-xs">
+                  {{ student.book }}
+                </div>
+                <div class="flex justify-between items-center">
+                  <span
+                    class="text-xs bg-purple-500/20 text-gray-900 px-2 py-1 rounded"
+                  >
+                    {{ student.category }}
+                  </span>
+                  <span class="text-xs text-gray-800">
+                    {{ student.borrowDate }}
+                  </span>
                 </div>
               </div>
-            </div>
-            <div v-else-if="students.length === 0">Loading...</div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <i class="fa-solid fa-search text-2xl mb-2"></i>
-              <p class="text-sm">No students found matching your search</p>
             </div>
           </div>
         </div>
